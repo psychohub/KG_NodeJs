@@ -7,6 +7,7 @@ const adRoutes = require('./src/routes/adRoutes');
 const cors = require('cors');
 const errorHandler = require('./errorHandler');
 const path = require('path'); 
+const Ad = require('./src/models/adModel');
 const app = express();
 
 // Importa la configuración de mongoose
@@ -23,10 +24,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 app.use('/images', express.static(path.join(__dirname, 'src/images')));
 
-// Definir ruta para renderizar la vista
-app.get('/', (_req, res) => {
-    res.render('index', { adData: adData });
-});
+app.get('/', adController.getAds);
 
 
 
@@ -45,7 +43,15 @@ const upload = multer({ storage: storage });
 // Registrar un nuevo anuncio
 app.post('/api/ads/registrar', upload.single('foto'), adController.registrarAnuncio);
 
-
+app.get('/confirmacion', async function(req, res) {
+    // Obtén la lista actualizada de anuncios
+    const ads = await Ad.find();
+  
+    const successMessage = 'Anuncio registrado correctamente';
+  
+    // Renderiza la vista con la lista actualizada de anuncios y el mensaje de éxito
+    res.render('index', { adData: { anuncios: ads }, success: successMessage });
+  });
 
 // Usar las rutas de anuncios
 app.use('/api/ads', adRoutes);

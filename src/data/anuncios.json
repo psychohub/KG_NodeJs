@@ -4,42 +4,42 @@
         "nombre": "Bicicleta",
         "venta": true,
         "precio": 230.15,
-        "foto": "src/images/Bicicleta.jpg",
+        "foto": "/images/Bicicleta.jpg",
         "tags": ["lifestyle", "motor"]
       },
       {
         "nombre": "iPhone 3GS",
         "venta": false,
         "precio": 50.00,
-        "foto": "src/images/iPhone 3GS.jpg",
+        "foto": "/images/iPhone 3GS.jpg",
         "tags": ["lifestyle", "mobile"]
       },
       {
         "nombre": "Monitor 4K",
         "venta": true,
         "precio": 400.00,
-        "foto": "src/images/Monitor 4K.jpg",
+        "foto": "/images/Monitor 4K.jpg",
         "tags": ["work", "lifestyle"]
       },
       {
         "nombre": "Libro de Ciencia Ficción",
         "venta": true,
         "precio": 20.00,
-        "foto": "src/images/Libro de Ciencia Ficción.jpg",
+        "foto": "/images/Libro de Ciencia Ficción.jpg",
         "tags": ["lifestyle", "work"]
       },
       {
         "nombre": "Teclado Mecánico",
         "venta": true,
         "precio": 80.00,
-        "foto": "src/images/Teclado Mecánico.jpg",
+        "foto": "/images/Teclado Mecánico.jpg",
         "tags": ["work", "lifestyle"]
       },
       {
         "nombre": "Silla de Oficina",
         "venta": false,
         "precio": 120.00,
-        "foto": "src/images/Silla de Oficina.jpg",
+        "foto": "/images/Silla de Oficina.jpg",
         "tags": ["work", "lifestyle"]
       }
     ]

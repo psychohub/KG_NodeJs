@@ -8,18 +8,28 @@ const { uploadDir } = require('../../config');
 exports.getAds = async (req, res) => {
   try {
     const ads = await Ad.find();
-    res.json({ success: true, data: ads });
+
+    // Verificar si es una solicitud de API o no
+    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+
+    if (isApiRequest) {
+      res.json({ success: true, data: ads });
+    } else {
+      // Si no es una solicitud de API, renderizar la vista
+      res.render('index', { adData: { anuncios: ads } });
+    }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
     res.status(500).json({ success: false, error: 'Error interno del servidor' });
   }
 };
 
+
 // Registrar un nuevo anuncio
 exports.registrarAnuncio = async (req, res) => {
   try {
     const { nombre, precio, tags } = req.body;
-    const venta = req.body.venta === 'on'; 
+    const venta = req.body.venta === 'on';
     const tempFilePath = req.file.path;
     const imageFileName = `${Date.now()}_${req.file.originalname}`;
     const imagePath = path.join(uploadDir, imageFileName);
@@ -39,21 +49,18 @@ exports.registrarAnuncio = async (req, res) => {
     // Guarda el anuncio en la base de datos
     await nuevoAnuncio.save();
 
-  // Mensaje de éxito
+    // Obtén la lista actualizada de anuncios
+    const ads = await Ad.find();
+
     const successMessage = 'Anuncio registrado correctamente';
-    
-    // Si la solicitud es AJAX, envía la respuesta JSON
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-      res.status(200).json({ success: true, message: successMessage });
-    } else {
-      // Si no es una solicitud AJAX, redirige y pasa el mensaje como parámetro de consulta
-      res.redirect(`/?success=${encodeURIComponent(successMessage)}`);
-    }
+
+    // Renderiza la vista con la lista actualizada de anuncios y el mensaje de éxito
+    res.redirect('/confirmacion');
   } catch (error) {
     console.error(`Error al registrar el anuncio: ${error}`);
-    // Si hay un error, redirige y pasa el mensaje de error como parámetro de consulta
     res.redirect(`/?error=${encodeURIComponent('Error interno del servidor')}`);
   }
 };
+
 
 

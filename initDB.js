@@ -4,10 +4,11 @@ const adData = require('./src/data/anuncios.json');
 
 const initDB = async () => {
   try {
-    await connectMongoose;
+    await connectMongoose.mongoose.connection;
 
     // Borrar todas las entradas existentes
-    await Ad.deleteMany({});
+    const deleteResult = await Ad.deleteMany({});
+    console.log(`Registros eliminados con éxito. Total eliminados: ${deleteResult.deletedCount}`);
 
     // Insertar nuevos anuncios desde el archivo anuncios.json
     await Ad.insertMany(adData.anuncios);

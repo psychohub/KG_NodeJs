@@ -65,8 +65,8 @@
         <h2><%= anuncio.nombre %></h2>
         <p><%= anuncio.venta ? 'Se vende' : 'Se busca' %></p>
         <p>Precio: <%= anuncio.precio %></p>
-        <% if (anuncio.imagenUrl) { %>
-          <img class="anuncio-img" src="<%= anuncio.imagenUrl() %>" alt="<%= anuncio.nombre %>">
+        <% if (anuncio.foto) { %>
+          <img class="anuncio-img" src="<%= anuncio.foto %>" alt="<%= anuncio.nombre %>">
         <% } else { %>
           <img class="anuncio-img" src="/images/<%= anuncio.nombre %>.jpg" alt="<%= anuncio.nombre %>">
         <% } %>
@@ -74,6 +74,6 @@
       </li>
     <% }); %>
   </ul>
-  </ul>
+  
 </body>
 </html>
