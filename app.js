@@ -1,4 +1,6 @@
 const express = require('express');
+const adController = require('./src/controller/adController');
+const multer = require('multer');
 const bodyParser = require('body-parser');
 const adData = require('./src/data/anuncios.json');
 const adRoutes = require('./src/routes/adRoutes');
@@ -9,13 +11,12 @@ const app = express();
 
 // Importa la configuración de mongoose
 const { connection } = require('./connectMongoose');
+const { uploadDir } = require(path.join(__dirname, 'config'));
 
 // Configuración de Express
 app.use(cors()); 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-//routes
 
 // Importar ejs
 app.set('view engine', 'ejs');
@@ -27,19 +28,33 @@ app.get('/', (_req, res) => {
     res.render('index', { adData: adData });
 });
 
-app.use('/api/ads', adRoutes);
- 
 
+
+// Configuración de multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
+    },
+  });
+
+const upload = multer({ storage: storage });
+
+// Registrar un nuevo anuncio
+app.post('/api/ads/registrar', upload.single('foto'), adController.registrarAnuncio);
+
+
+
+// Usar las rutas de anuncios
+app.use('/api/ads', adRoutes);
 
 connection.once('open', () => {
     app.listen(3000, () => {
         console.log('Servidor iniciado en el puerto 3000');
-        adData;
     });
 });
 
-
-
 // Middleware de manejo de errores
 app.use(errorHandler);
-
