@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const adController = require('./src/controller/adController');
 const multer = require('multer');
 const bodyParser = require('body-parser');
@@ -24,8 +25,8 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 app.use('/images', express.static(path.join(__dirname, 'src/images')));
 
-app.get('/', adController.getAds);
 
+app.use('/api/ads', adRoutes);
 
 
 // Configuración de multer
@@ -40,11 +41,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Filtrado de anuncios
+app.get('/anuncios/filtro', adController.getFilteredAds);
+
+
+// Obtiene lista de anuncios
+
+app.get('/api/ads/anuncios', adController.getAds);
+
 // Registrar un nuevo anuncio
 app.post('/api/ads/registrar', upload.single('foto'), adController.registrarAnuncio);
 
 app.get('/confirmacion', async function(req, res) {
-    // Obtén la lista actualizada de anuncios
+    // lista actualizada de anuncios
     const ads = await Ad.find();
   
     const successMessage = 'Anuncio registrado correctamente';
@@ -53,8 +62,13 @@ app.get('/confirmacion', async function(req, res) {
     res.render('index', { adData: { anuncios: ads }, success: successMessage });
   });
 
-// Usar las rutas de anuncios
-app.use('/api/ads', adRoutes);
+
+
+ // Redirección de la ruta principal
+ app.get('/', (req, res) => {
+  res.redirect('/api/ads/anuncios');
+});
+
 
 connection.once('open', () => {
     app.listen(3000, () => {

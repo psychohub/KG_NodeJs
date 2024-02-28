@@ -24,6 +24,61 @@ exports.getAds = async (req, res) => {
   }
 };
 
+// Obtener lista de anuncios con filtros
+exports.getFilteredAds = async (req, res) => {
+  try {
+    const { tag, venta, nombre, precio, start, limit, sort } = req.query;
+
+    const filters = {};
+
+    // Filtro por tag
+    if (tag) {
+      filters.tags = tag;
+    }
+
+    // Filtro por tipo de anuncio (venta o búsqueda)
+    if (venta !== undefined) {
+      filters.venta = venta === 'true';
+    }
+
+    // Filtro por rango de precio
+    if (precio) {
+      const precioParts = precio.split('-');
+      if (precioParts.length === 1) {
+        filters.precio = { $eq: parseFloat(precioParts[0]) };
+      } else if (precioParts.length === 2) {
+        const precioFilter = {};
+        if (precioParts[0]) precioFilter.$gte = parseFloat(precioParts[0]);
+        if (precioParts[1]) precioFilter.$lte = parseFloat(precioParts[1]);
+        filters.precio = precioFilter;
+      }
+    }
+
+    // Filtro por nombre de artículo
+    if (nombre) {
+      filters.nombre = new RegExp(nombre, 'i');
+    }
+
+    // Agregar más filtros según sea necesario
+
+    // Elimina propiedades con valores falsy (undefined, null, "")
+    Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
+
+    // Implementa lógica para aplicar los filtros a la consulta
+    const ads = await Ad.find(filters)
+      .skip(parseInt(start) || 0)
+      .limit(parseInt(limit) || 10)
+      .sort(sort || 'createdAt');
+
+    res.json({ success: true, data: ads });
+  } catch (error) {
+    console.error(`Error obteniendo la lista de anuncios: ${error}`);
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+  }
+};
+
+
+
 
 // Registrar un nuevo anuncio
 exports.registrarAnuncio = async (req, res) => {

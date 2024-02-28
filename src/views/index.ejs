@@ -26,27 +26,27 @@
     <h1>Registrar</h1>
     <div>
       <label for="nombre">Nombre:</label>
-      <input type="text" name="nombre" required>
+      <input type="text" id="nombre" name="nombre" required>
     </div>
   
     <div>
       <label for="venta">Venta:</label>
-      <input type="checkbox" name="venta">
+      <input type="checkbox" id="venta" name="venta">
     </div>
   
     <div>
       <label for="precio">Precio:</label>
-      <input type="number" name="precio" required>
+      <input type="number" id="precio" name="precio" required>
     </div>
   
     <div>
       <label for="foto">Foto:</label>
-      <input type="file" name="foto" accept="image/*" required>
+      <input type="file" id="foto" name="foto" accept="image/*" required>
     </div>
   
     <div>
       <label for="tags">Tags:</label>
-      <select name="tags" multiple>
+      <select id="tags" name="tags" multiple>
         <option value="work">Work</option>
         <option value="lifestyle">Lifestyle</option>
         <option value="motor">Motor</option>
@@ -57,9 +57,39 @@
     <button type="submit">Registrar Anuncio</button>
   </form>
   
+  <form action="/anuncios/filtro" method="get">
+    <h2>Filtrar Anuncios</h2>
+    <div>
+      <label for="tag">Tag:</label>
+      <input type="text" id="tag" name="tag" <% if (tag) { %>value="<%= tag %>"<% } %>>
+    </div>
+  
+    <div>
+      <label for="venta">Tipo:</label>
+      <select id="venta" name="venta">
+        <option value="" <% if (!venta) { %>selected<% } %>>Todos</option>
+        <option value="true" <% if (venta === 'true') { %>selected<% } %>>Venta</option>
+        <option value="false" <% if (venta === 'false') { %>selected<% } %>>Búsqueda</option>
+      </select>
+    </div>
+  
+    <div>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" <% if (nombre) { %>value="<%= nombre %>"<% } %>>
+    </div>
+  
+    <div>
+      <label for="precio">Precio:</label>
+      <input type="text" id="precio" name="precio" <% if (precio) { %>value="<%= precio %>"<% } %>>
+    </div>
+  
+    <button type="submit">Buscar</button>
+  </form>
+  
   <h1>Anuncios</h1>
-  <!-- Mostrar la lista de anuncios aquí -->
-  <ul>
+<!-- Mostrar la lista de anuncios aquí -->
+<ul>
+  <% if (adData && adData.anuncios && adData.anuncios.length > 0) { %>
     <% adData.anuncios.forEach(anuncio => { %>
       <li>
         <h2><%= anuncio.nombre %></h2>
@@ -73,7 +103,11 @@
         <p>Tags: <%= anuncio.tags.join(', ') %></p>
       </li>
     <% }); %>
-  </ul>
+  <% } else { %>
+    <li>No se encontraron anuncios</li>
+  <% } %>
+</ul>
+
   
 </body>
 </html>
