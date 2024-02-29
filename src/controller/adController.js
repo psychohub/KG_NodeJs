@@ -40,7 +40,7 @@ exports.getAds = async (req, res) => {
 // Obtener lista de anuncios con filtros
 exports.getFilteredAds = async (req, res) => {
   try {
-    const { tag, venta, nombre, precioMin, precioMax, start, limit, sort } = req.query;
+    const { tag, venta, nombre, precioMin, precioMax} = req.query;
 
     const filters = {};
 
@@ -77,7 +77,7 @@ exports.getFilteredAds = async (req, res) => {
       res.json({ success: true, data: ads });
     } else {
       // Modificar para renderizar una vista con los anuncios filtrados
-      res.render('filtered-ads', { adData: { anuncios: ads } }); // Asegúrate de tener una vista 'filtered-ads.ejs'
+      res.render('filtered-ads', { adData: { anuncios: ads } });
     }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
@@ -90,9 +90,21 @@ exports.getFilteredAds = async (req, res) => {
 
 // Registrar un nuevo anuncio
 exports.registrarAnuncio = async (req, res) => {
+  console.log(req.file);
   try {
+    // Verificar si req.file está definido y no es null
+    if (!req.file) {
+      throw new Error('No se ha enviado ningún archivo');
+    }
+
     const { nombre, precio, tags } = req.body;
     const venta = req.body.venta === 'on';
+    
+    // Verificar que req.file.path y req.file.originalname contengan valores
+    if (!req.file.path || !req.file.originalname) {
+      throw new Error('La información de la imagen es inválida');
+    }
+
     const tempFilePath = req.file.path;
     const imageFileName = `${Date.now()}_${req.file.originalname}`;
     const imagePath = path.join(uploadDir, imageFileName);
@@ -127,6 +139,7 @@ exports.registrarAnuncio = async (req, res) => {
 
 
 
+
 // Función para manejar las solicitudes de imágenes
 exports.getImage = (req, res) => {
   const imageName = req.params.imageName;
@@ -138,6 +151,7 @@ exports.getImage = (req, res) => {
     }
   });
 };
+
 
 
 

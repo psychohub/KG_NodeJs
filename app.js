@@ -31,15 +31,20 @@ app.use('/api/ads', adRoutes);
 
 // Configuración de multer
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-      cb(null, file.originalname);
-    },
-  });
+  destination: (req, file, cb) => {
+    cb(null, uploadDir); 
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
 
 const upload = multer({ storage: storage });
+
+
+// Registrar un nuevo anuncio
+app.post('/api/ads/anuncios/registrar', upload.single('foto'), adController.registrarAnuncio);
+
 
 // Ruta para servir imágenes específicas basadas en el nombre del archivo en la URL
 app.get('/api/ads/anuncios/:imageName', adController.getImage);
@@ -52,8 +57,8 @@ app.get('/anuncios/filtro', adController.getFilteredAds);
 
 app.get('/api/ads/anuncios', adController.getAds);
 
-// Registrar un nuevo anuncio
-app.post('/api/ads/registrar', upload.single('foto'), adController.registrarAnuncio);
+
+
 
 app.get('/confirmacion', async function(req, res) {
     // lista actualizada de anuncios
