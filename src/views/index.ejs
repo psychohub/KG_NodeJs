@@ -18,6 +18,36 @@
       display: block;
       margin-bottom: 5px; 
     }
+
+    ul {
+      list-style-type: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0;
+      justify-content: space-around; 
+    }
+    li {
+      flex-basis: calc(33.333% - 20px); 
+      margin: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 5px; 
+    }
+    .anuncio-img {
+      width: 50%; 
+      height: auto; 
+      border-radius: 5px 5px 0 0; 
+    }
+    @media (max-width: 800px) {
+      li {
+        flex-basis: calc(50% - 20px); 
+      }
+    }
+    @media (max-width: 500px) {
+      li {
+        flex-basis: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -67,7 +97,6 @@
     <div>
       <label for="venta">Tipo:</label>
       <select id="venta" name="venta">
-        <option value="" <% if (!venta) { %>selected<% } %>>Todos</option>
         <option value="true" <% if (venta === 'true') { %>selected<% } %>>Venta</option>
         <option value="false" <% if (venta === 'false') { %>selected<% } %>>Búsqueda</option>
       </select>
@@ -78,14 +107,21 @@
       <input type="text" id="nombre" name="nombre" <% if (nombre) { %>value="<%= nombre %>"<% } %>>
     </div>
   
-    <div>
-      <label for="precio">Precio:</label>
-      <input type="text" id="precio" name="precio" <% if (precio) { %>value="<%= precio %>"<% } %>>
-    </div>
+  <div>
+  <label for="precioMin">Precio Mínimo:</label>
+  <input type="number" id="precioMin" name="precioMin" <% if (precioMin) { %>value="<%= precioMin %>"<% } %>>
+</div>
+
+<div>
+  <label for="precioMax">Precio Máximo:</label>
+  <input type="number" id="precioMax" name="precioMax" <% if (precioMax) { %>value="<%= precioMax %>"<% } %>>
+</div>
+
   
     <button type="submit">Buscar</button>
   </form>
-  
+ 
+
   <h1>Anuncios</h1>
 <!-- Mostrar la lista de anuncios aquí -->
 <ul>
@@ -110,4 +146,6 @@
 
   
 </body>
+
+
 </html>

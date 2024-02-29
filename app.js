@@ -41,6 +41,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Ruta para servir imágenes específicas basadas en el nombre del archivo en la URL
+app.get('/api/ads/anuncios/:imageName', adController.getImage);
+
 // Filtrado de anuncios
 app.get('/anuncios/filtro', adController.getFilteredAds);
 

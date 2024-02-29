@@ -1,6 +1,7 @@
 const Ad = require('../models/adModel');
 const fs = require('fs');
 const path = require('path');
+const pathModule = require('path');
 const { uploadDir } = require('../../config');
 
 
@@ -9,14 +10,25 @@ exports.getAds = async (req, res) => {
   try {
     const ads = await Ad.find();
 
+   
+    const data = {
+      adData: { anuncios: ads },
+      tag: '', 
+      nombre: '',
+      venta: '',
+      precioMin: '',
+      precioMax: '',
+
+    };
+
     // Verificar si es una solicitud de API o no
     const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
 
     if (isApiRequest) {
       res.json({ success: true, data: ads });
     } else {
-      // Si no es una solicitud de API, renderizar la vista
-      res.render('index', { adData: { anuncios: ads } });
+     
+      res.render('index', data);
     }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
@@ -24,53 +36,49 @@ exports.getAds = async (req, res) => {
   }
 };
 
+
 // Obtener lista de anuncios con filtros
 exports.getFilteredAds = async (req, res) => {
   try {
-    const { tag, venta, nombre, precio, start, limit, sort } = req.query;
+    const { tag, venta, nombre, precioMin, precioMax, start, limit, sort } = req.query;
 
     const filters = {};
 
-    // Filtro por tag
-    if (tag) {
-      filters.tags = tag;
-    }
+   // Filtro por tag, venta, nombre
+   if (tag) filters.tags = tag;
+   if (venta !== undefined) filters.venta = venta === 'true';
+   if (nombre) filters.nombre = new RegExp(nombre, 'i');
 
-    // Filtro por tipo de anuncio (venta o búsqueda)
-    if (venta !== undefined) {
-      filters.venta = venta === 'true';
-    }
+   // Filtro por rango de precio
+   if (precioMin || precioMax) {
+     const precioFilter = {};
+     if (precioMin) precioFilter.$gte = parseFloat(precioMin);
+     if (precioMax) precioFilter.$lte = parseFloat(precioMax);
+     filters.precio = precioFilter;
+   }
 
-    // Filtro por rango de precio
-    if (precio) {
-      const precioParts = precio.split('-');
-      if (precioParts.length === 1) {
-        filters.precio = { $eq: parseFloat(precioParts[0]) };
-      } else if (precioParts.length === 2) {
-        const precioFilter = {};
-        if (precioParts[0]) precioFilter.$gte = parseFloat(precioParts[0]);
-        if (precioParts[1]) precioFilter.$lte = parseFloat(precioParts[1]);
-        filters.precio = precioFilter;
-      }
-    }
+  
 
     // Filtro por nombre de artículo
     if (nombre) {
       filters.nombre = new RegExp(nombre, 'i');
     }
 
-    // Agregar más filtros según sea necesario
 
     // Elimina propiedades con valores falsy (undefined, null, "")
     Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
 
     // Implementa lógica para aplicar los filtros a la consulta
-    const ads = await Ad.find(filters)
-      .skip(parseInt(start) || 0)
-      .limit(parseInt(limit) || 10)
-      .sort(sort || 'createdAt');
+    const ads = await Ad.find(filters); // Asegúrate de que esto coincida con tu lógica de filtrado actual.
 
-    res.json({ success: true, data: ads });
+    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+
+    if (isApiRequest) {
+      res.json({ success: true, data: ads });
+    } else {
+      // Modificar para renderizar una vista con los anuncios filtrados
+      res.render('filtered-ads', { adData: { anuncios: ads } }); // Asegúrate de tener una vista 'filtered-ads.ejs'
+    }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
     res.status(500).json({ success: false, error: 'Error interno del servidor' });
@@ -116,6 +124,21 @@ exports.registrarAnuncio = async (req, res) => {
     res.redirect(`/?error=${encodeURIComponent('Error interno del servidor')}`);
   }
 };
+
+
+
+// Función para manejar las solicitudes de imágenes
+exports.getImage = (req, res) => {
+  const imageName = req.params.imageName;
+  const imagePath = pathModule.join(__dirname, '..', '..', 'src', 'images', imageName);
+
+  res.sendFile(imagePath, (err) => {
+    if (err) {
+      res.status(404).send('Imagen no encontrada');
+    }
+  });
+};
+
 
 
 
