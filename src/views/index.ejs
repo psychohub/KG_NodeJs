@@ -108,7 +108,6 @@
   </div>
   </form>
         <h1>Anuncios</h1>
-  <!-- Mostrar la lista de anuncios aquí -->
   <ul>
     <% if (adData && adData.anuncios && adData.anuncios.length > 0) { %>
       <% adData.anuncios.forEach(anuncio => { %>
@@ -139,8 +138,6 @@
         <div class="mb-3">
           <label for="nombre" class="form-label">Nombre:</label>
           <input type="text" id="nombre" name="nombre" class="form-control" <%= typeof nombre !== 'undefined' ? `value="${nombre}"` : '' %> >
-        
-
         </div>
         <div class="mb-3">
           <label for="venta" class="form-label">Tipo:</label>
@@ -170,7 +167,6 @@
       </div>
       </div>
       <h1>Anuncios</h1>
-      <!-- Mostrar la lista de anuncios aquí -->
       <ul>
         <% if (adData && adData.anuncios && adData.anuncios.length > 0) { %>
           <% adData.anuncios.forEach(anuncio => { %>

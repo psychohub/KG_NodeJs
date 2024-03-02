@@ -5,13 +5,13 @@ const pathModule = require('path');
 const { uploadDir } = require('../../config');
 
 
+
 // Obtener lista de anuncios sin filtros
 exports.getAds = async (req, res) => {
   try {
     const ads = await Ad.find();
 
-   
-    const data = {
+       const data = {
       adData: { anuncios: ads },
       tag: '', 
       nombre: '',
@@ -20,7 +20,7 @@ exports.getAds = async (req, res) => {
       precioMax: '',
 
     };
-
+    
     // Verificar si es una solicitud de API o no
     const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
 
@@ -56,28 +56,24 @@ exports.getFilteredAds = async (req, res) => {
      if (precioMax) precioFilter.$lte = parseFloat(precioMax);
      filters.precio = precioFilter;
    }
-
   
-
-    // Filtro por nombre de artículo
+    // Filtro por nombre 
     if (nombre) {
       filters.nombre = new RegExp(nombre, 'i');
     }
 
-
     // Elimina propiedades con valores falsy (undefined, null, "")
     Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
 
-    // Implementa lógica para aplicar los filtros a la consulta
-    const ads = await Ad.find(filters); // Asegúrate de que esto coincida con tu lógica de filtrado actual.
+    // lógica para aplicar los filtros a la consulta
+    const ads = await Ad.find(filters); 
 
     const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
 
     if (isApiRequest) {
       res.json({ success: true, data: ads });
     } else {
-      // Modificar para renderizar una vista con los anuncios filtrados
-      res.render('filtered-ads', { adData: { anuncios: ads } });
+         res.render('filtered-ads', { adData: { anuncios: ads } });
     }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
@@ -85,32 +81,34 @@ exports.getFilteredAds = async (req, res) => {
   }
 };
 
-
-
-
 // Registrar un nuevo anuncio
+const { body, validationResult } = require('express-validator');
+
 exports.registrarAnuncio = async (req, res) => {
-  console.log(req.file);
   try {
-    // Verificar si req.file está definido y no es null
+    // Ejecuta las validaciones
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      // Si hay errores de validación, devuelve una respuesta con los errores
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     if (!req.file) {
-      throw new Error('No se ha enviado ningún archivo');
+      // Diferenciar entre respuestas API y estándar
+      if (req.headers.accept && req.headers.accept.includes('json')) {
+        return res.status(400).json({ error: 'No se ha enviado ningún archivo' });
+      } else {
+        return res.redirect(`/?error=${encodeURIComponent('No se ha enviado ningún archivo')}`);
+      }
     }
 
     const { nombre, precio, tags } = req.body;
     const venta = req.body.venta === 'on';
-    
-    // Verificar que req.file.path y req.file.originalname contengan valores
-    if (!req.file.path || !req.file.originalname) {
-      throw new Error('La información de la imagen es inválida');
-    }
-
     const tempFilePath = req.file.path;
     const imageFileName = `${Date.now()}_${req.file.originalname}`;
     const imagePath = path.join(uploadDir, imageFileName);
     const fileBuffer = fs.readFileSync(tempFilePath);
     fs.writeFileSync(imagePath, fileBuffer);
-
     fs.unlinkSync(tempFilePath);
 
     const nuevoAnuncio = new Ad({
@@ -121,23 +119,30 @@ exports.registrarAnuncio = async (req, res) => {
       tags: Array.isArray(tags) ? tags : [tags],
     });
 
-    // Guarda el anuncio en la base de datos
     await nuevoAnuncio.save();
 
-    // Obtén la lista actualizada de anuncios
-    const ads = await Ad.find();
-
-    const successMessage = 'Anuncio registrado correctamente';
-
-    // Renderiza la vista con la lista actualizada de anuncios y el mensaje de éxito
-    res.redirect('/confirmacion');
-  } catch (error) {
-    console.error(`Error al registrar el anuncio: ${error}`);
-    res.redirect(`/?error=${encodeURIComponent('Error interno del servidor')}`);
-  }
+   // Verificar si es una solicitud de API
+   const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+   if (isApiRequest) {
+     return res.json({ success: true, message: 'Anuncio registrado correctamente', data: nuevoAnuncio });
+   } else {
+     return res.redirect('/confirmacion'); 
+   }
+ } catch (error) {
+   console.error(`Error al registrar el anuncio: ${error}`);
+   if (isApiRequest) {
+     return res.status(500).json({ error: 'Error interno del servidor' });
+   } else {
+     return res.redirect(`/?error=${encodeURIComponent(error.message)}`);
+   }
+ }
 };
 
-
+// Reglas de validación para el registro de anuncios
+exports.validateRegistroAnuncio = [
+  body('nombre').notEmpty().withMessage('El nombre es requerido'),
+  body('precio').isNumeric().withMessage('El precio debe ser un número válido'),
+];
 
 
 // Función para manejar las solicitudes de imágenes

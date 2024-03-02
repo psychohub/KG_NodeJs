@@ -9,6 +9,7 @@ const cors = require('cors');
 const errorHandler = require('./errorHandler');
 const path = require('path'); 
 const Ad = require('./src/models/adModel');
+const { body, validationResult } = require('express-validator');
 const app = express();
 
 // Importa la configuración de mongoose
@@ -25,7 +26,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 app.use('/images', express.static(path.join(__dirname, 'src/images')));
 
-
+//Rutas
 app.use('/api/ads', adRoutes);
 
 
@@ -42,9 +43,17 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-// Registrar un nuevo anuncio
-app.post('/api/ads/anuncios/registrar', upload.single('foto'), adController.registrarAnuncio);
+// Registrar un nuevo anuncio con validaciones
+app.post('/api/ads/anuncios/registrar',
+  upload.single('foto'), 
+  [
+  
+    body('nombre').notEmpty().withMessage('El nombre es requerido'),
+    body('precio').isNumeric().withMessage('El precio debe ser un número válido'),
 
+  ],
+  adController.registrarAnuncio
+);
 
 // Ruta para servir imágenes específicas basadas en el nombre del archivo en la URL
 app.get('/api/ads/anuncios/:imageName', adController.getImage);
@@ -54,10 +63,7 @@ app.get('/anuncios/filtro', adController.getFilteredAds);
 
 
 // Obtiene lista de anuncios
-
 app.get('/api/ads/anuncios', adController.getAds);
-
-
 
 
 app.get('/confirmacion', async function(req, res) {
@@ -71,12 +77,10 @@ app.get('/confirmacion', async function(req, res) {
   });
 
 
-
  // Redirección de la ruta principal
  app.get('/', (req, res) => {
   res.redirect('/api/ads/anuncios');
 });
-
 
 connection.once('open', () => {
     app.listen(3000, () => {
