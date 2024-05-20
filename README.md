@@ -1,3 +1,11 @@
+
+## Instalación
+
+Antes de iniciar el proyecto, asegúrate de ejecutar el siguiente comando para instalar las dependencias:
+
+npm install
+
+
 ## Operaciones Disponibles
 
 El API de Nodepop proporciona las siguientes operaciones:
