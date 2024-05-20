@@ -1,6 +1,22 @@
+const readline = require('readline');
 const connectMongoose = require('./connectMongoose');
 const Ad = require('./src/models/adModel');
 const adData = require('./src/data/anuncios.json');
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question('¿Estás seguro de que deseas reiniciar la base de datos? Esta acción eliminará todos los datos existentes. (sí/no): ', (answer) => {
+  if (answer.toLowerCase() === 'sí' || answer.toLowerCase() === 'si') {
+    initDB();
+  } else {
+    console.log('Operación cancelada');
+    rl.close();
+    process.exit(0);
+  }
+});
 
 const initDB = async () => {
   try {
@@ -20,5 +36,3 @@ const initDB = async () => {
     process.exit(1);
   }
 };
-
-initDB();
