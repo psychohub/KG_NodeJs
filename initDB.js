@@ -1,11 +1,12 @@
 const readline = require('readline');
 const connectMongoose = require('./connectMongoose');
+const User = require('./src/models/userModel');
 const Ad = require('./src/models/adModel');
 const adData = require('./src/data/anuncios.json');
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 });
 
 rl.question('¿Estás seguro de que deseas reiniciar la base de datos? Esta acción eliminará todos los datos existentes. (sí/no): ', (answer) => {
@@ -29,6 +30,14 @@ const initDB = async () => {
     // Insertar nuevos anuncios desde el archivo anuncios.json
     await Ad.insertMany(adData.anuncios);
 
+    // Eliminar el usuario existente
+    await User.deleteMany({ email: 'user@example.com' });
+
+    // Usuario inicial
+    const user = new User({ email: 'user@example.com', password: '1234' });
+    await user.save();
+
+    console.log('Usuario inicial creado con éxito');
     console.log('Base de datos inicializada con éxito');
     process.exit(0);
   } catch (error) {

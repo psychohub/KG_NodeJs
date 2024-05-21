@@ -1,3 +1,5 @@
+require('dotenv').config(); 
+
 const express = require('express');
 const axios = require('axios');
 const adController = require('./src/controller/adController');
@@ -5,6 +7,8 @@ const multer = require('multer');
 const bodyParser = require('body-parser');
 const adData = require('./src/data/anuncios.json');
 const adRoutes = require('./src/routes/adRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const authMiddleware = require('./src/middleware/authMiddleware');
 const cors = require('cors');
 const errorHandler = require('./errorHandler');
 const path = require('path'); 
@@ -29,6 +33,11 @@ app.use('/images', express.static(path.join(__dirname, 'src/images')));
 //Rutas
 app.use('/api/ads', adRoutes);
 
+// Rutas de autenticación
+app.use('/api/auth', authRoutes);
+
+// Rutas protegidas
+app.use('/api/ads', authMiddleware.requireAuth, adRoutes);
 
 // Configuración de multer
 const storage = multer.diskStorage({
