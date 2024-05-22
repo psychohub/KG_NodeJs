@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 
 exports.requireAuth = (req, res, next) => {
-  const token = req.headers.authorization || req.query.token;
+  // Obtener el token desde la cabecera 'Authorization'
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1] || req.cookies.token;
 
   if (!token) {
     return res.status(401).json({ error: 'Acceso no autorizado' });
@@ -15,3 +17,4 @@ exports.requireAuth = (req, res, next) => {
     res.status(401).json({ error: 'Token inválido o caducado' });
   }
 };
+

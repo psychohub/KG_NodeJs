@@ -11,24 +11,22 @@ exports.getAds = async (req, res) => {
   try {
     const ads = await Ad.find();
 
-       const data = {
+    const data = {
       adData: { anuncios: ads },
       tag: '', 
       nombre: '',
       venta: '',
       precioMin: '',
       precioMax: '',
-
     };
-    
+
     // Verificar si es una solicitud de API o no
     const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
 
     if (isApiRequest) {
       res.json({ success: true, data: ads });
     } else {
-     
-      res.render('index', data);
+      res.render('index', { ...data, req });
     }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
@@ -86,15 +84,12 @@ const { body, validationResult } = require('express-validator');
 
 exports.registrarAnuncio = async (req, res) => {
   try {
-    // Ejecuta las validaciones
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // Si hay errores de validación, devuelve una respuesta con los errores
       return res.status(400).json({ errors: errors.array() });
     }
 
     if (!req.file) {
-      // Diferenciar entre respuestas API y estándar
       if (req.headers.accept && req.headers.accept.includes('json')) {
         return res.status(400).json({ error: 'No se ha enviado ningún archivo' });
       } else {
@@ -121,7 +116,6 @@ exports.registrarAnuncio = async (req, res) => {
 
     await nuevoAnuncio.save();
 
-   // Verificar si es una solicitud de API
    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
    if (isApiRequest) {
      return res.json({ success: true, message: 'Anuncio registrado correctamente', data: nuevoAnuncio });

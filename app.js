@@ -1,22 +1,23 @@
 require('dotenv').config(); 
 
+// Importar rutas y controladores
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const express = require('express');
-const axios = require('axios');
-const adController = require('./src/controller/adController');
-const multer = require('multer');
+const i18n = require('i18n');
 const bodyParser = require('body-parser');
-const adData = require('./src/data/anuncios.json');
-const adRoutes = require('./src/routes/adRoutes');
-const authRoutes = require('./src/routes/authRoutes');
-const authMiddleware = require('./src/middleware/authMiddleware');
 const cors = require('cors');
-const errorHandler = require('./errorHandler');
 const path = require('path'); 
-const Ad = require('./src/models/adModel');
-const { body, validationResult } = require('express-validator');
+const multer = require('multer');
+const { body } = require('express-validator');
 const app = express();
 
-// Importa la configuración de mongoose
+const adController = require('./src/controller/adController');
+const adRoutes = require('./src/routes/adRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const { requireAuth } = require('./src/middleware/authMiddleware');
+const errorHandler = require('./errorHandler');
+const Ad = require('./src/models/adModel');
 const { connection } = require('./connectMongoose');
 const { uploadDir } = require(path.join(__dirname, 'config'));
 
@@ -25,21 +26,22 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Importar ejs
+// Configuración de ejs para vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 app.use('/images', express.static(path.join(__dirname, 'src/images')));
 
-//Rutas
-app.use('/api/ads', adRoutes);
+// Configuración de i18n para el backend
+i18n.configure({
+  locales: ['en', 'es'],
+  directory: path.join(__dirname, 'locales'),
+  defaultLocale: 'en',
+  cookie: 'language',
+});
 
-// Rutas de autenticación
-app.use('/api/auth', authRoutes);
+app.use(i18n.init);
 
-// Rutas protegidas
-app.use('/api/ads', authMiddleware.requireAuth, adRoutes);
-
-// Configuración de multer
+// Configuración de multer para subir archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir); 
@@ -49,53 +51,70 @@ const storage = multer.diskStorage({
   },
 });
 
+app.use(cookieParser());
+
+function verifyToken(req, res, next) {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).send('Acceso denegado');
+  }
+
+  try {
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = verified;
+    next();
+  } catch (err) {
+    res.status(400).send('Token inválido');
+  }
+}
+
 const upload = multer({ storage: storage });
 
+// Rutas
+app.get('/api/login', (req, res) => {
+  res.render('login');
+});
 
-// Registrar un nuevo anuncio con validaciones
+app.use('/api/auth', authRoutes); 
+
+// Rutas de anuncios protegidas por autenticación
+app.use('/api/ads', requireAuth, adRoutes);
+
+// Ruta para registrar un nuevo anuncio con validaciones
 app.post('/api/ads/anuncios/registrar',
   upload.single('foto'), 
   [
-  
     body('nombre').notEmpty().withMessage('El nombre es requerido'),
     body('precio').isNumeric().withMessage('El precio debe ser un número válido'),
-
   ],
   adController.registrarAnuncio
 );
 
-// Ruta para servir imágenes específicas basadas en el nombre del archivo en la URL
+// Ruta para servir imágenes específicas
 app.get('/api/ads/anuncios/:imageName', adController.getImage);
 
-// Filtrado de anuncios
-app.get('/anuncios/filtro', adController.getFilteredAds);
+// Filtrado de anuncios (protegido)
+app.get('/anuncios/filtro', requireAuth, adController.getFilteredAds);
 
-
-// Obtiene lista de anuncios
-app.get('/api/ads/anuncios', adController.getAds);
-
-
-app.get('/confirmacion', async function(req, res) {
-    // lista actualizada de anuncios
-    const ads = await Ad.find();
-  
-    const successMessage = 'Anuncio registrado correctamente';
-  
-    // Renderiza la vista con la lista actualizada de anuncios y el mensaje de éxito
-    res.render('index', { adData: { anuncios: ads }, success: successMessage });
-  });
-
-
- // Redirección de la ruta principal
- app.get('/', (req, res) => {
+// Ruta principal redirigiendo a anuncios
+app.get('/', (req, res) => {
   res.redirect('/api/ads/anuncios');
 });
 
+// Ruta de confirmación
+app.get('/confirmacion', async function(req, res) {
+  const ads = await Ad.find();
+  const successMessage = 'Anuncio registrado correctamente';
+  res.render('index', { adData: { anuncios: ads }, success: successMessage });
+});
+
+// Conexión a la base de datos y levantamiento del servidor
 connection.once('open', () => {
-    app.listen(3000, () => {
-        console.log('Servidor iniciado en el puerto 3000');
-    });
+  app.listen(3000, () => {
+    console.log('Servidor iniciado en el puerto 3000');
+  });
 });
 
 // Middleware de manejo de errores
 app.use(errorHandler);
+app.use('/api/ads', verifyToken);
