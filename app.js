@@ -126,3 +126,5 @@ connection.once('open', () => {
 // Middleware de manejo de errores
 app.use(errorHandler);
 app.use('/api/ads', verifyToken);
+
+module.exports = app;
