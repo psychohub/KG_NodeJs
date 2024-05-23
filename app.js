@@ -11,7 +11,6 @@ const path = require('path');
 const multer = require('multer');
 const { body } = require('express-validator');
 const app = express();
-
 const adController = require('./src/controller/adController');
 const adRoutes = require('./src/routes/adRoutes');
 const authRoutes = require('./src/routes/authRoutes');
@@ -44,13 +43,14 @@ app.use(i18n.init);
 // Configuración de multer para subir archivos
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir); 
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, `${Date.now()}_${file.originalname}`);
   },
 });
 
+const upload = multer({ storage: storage });
 
 
 app.use(cookieParser());
@@ -76,7 +76,7 @@ function verifyToken(req, res, next) {
   }
 }
 
-const upload = multer({ storage: storage });
+
 
 // Rutas
 app.get('/api/login', (req, res) => {
@@ -99,7 +99,7 @@ app.post('/api/ads/anuncios/registrar',
 );
 
 // Ruta para servir imágenes específicas
-app.get('/api/ads/anuncios/:imageName', adController.getImage);
+app.get('/images/:imageName', adController.getImage);
 
 // Filtrado de anuncios (protegido)
 app.get('/anuncios/filtro', requireAuth, adController.getFilteredAds);
@@ -113,7 +113,7 @@ app.get('/', (req, res) => {
 app.get('/confirmacion', async function(req, res) {
   const ads = await Ad.find();
   const successMessage = 'Anuncio registrado correctamente';
-  res.render('index', { adData: { anuncios: ads }, success: successMessage });
+  res.render('index', { adData: { anuncios: ads }, success: successMessage, req });
 });
 
 // Conexión a la base de datos y levantamiento del servidor

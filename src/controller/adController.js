@@ -3,8 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const pathModule = require('path');
 const { uploadDir } = require('../../config');
-
-
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+const cote = require('cote');
+const requester = new cote.Requester({ name: 'thumbnail requester' });
 
 // Obtener lista de anuncios sin filtros
 exports.getAds = async (req, res) => {
@@ -38,24 +40,24 @@ exports.getAds = async (req, res) => {
 // Obtener lista de anuncios con filtros
 exports.getFilteredAds = async (req, res) => {
   try {
-    const { tag, venta, nombre, precioMin, precioMax} = req.query;
+    const { tag, venta, nombre, precioMin, precioMax } = req.query;
 
     const filters = {};
 
-   // Filtro por tag, venta, nombre
-   if (tag) filters.tags = tag;
-   if (venta !== undefined) filters.venta = venta === 'true';
-   if (nombre) filters.nombre = new RegExp(nombre, 'i');
+    // Filtro por tag, venta, nombre
+    if (tag) filters.tags = tag;
+    if (venta !== undefined) filters.venta = venta === 'true';
+    if (nombre) filters.nombre = new RegExp(nombre, 'i');
 
-   // Filtro por rango de precio
-   if (precioMin || precioMax) {
-     const precioFilter = {};
-     if (precioMin) precioFilter.$gte = parseFloat(precioMin);
-     if (precioMax) precioFilter.$lte = parseFloat(precioMax);
-     filters.precio = precioFilter;
-   }
-  
-    // Filtro por nombre 
+    // Filtro por rango de precio
+    if (precioMin || precioMax) {
+      const precioFilter = {};
+      if (precioMin) precioFilter.$gte = parseFloat(precioMin);
+      if (precioMax) precioFilter.$lte = parseFloat(precioMax);
+      filters.precio = precioFilter;
+    }
+
+    // Filtro por nombre
     if (nombre) {
       filters.nombre = new RegExp(nombre, 'i');
     }
@@ -64,14 +66,14 @@ exports.getFilteredAds = async (req, res) => {
     Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
 
     // lógica para aplicar los filtros a la consulta
-    const ads = await Ad.find(filters); 
+    const ads = await Ad.find(filters);
 
     const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
 
     if (isApiRequest) {
       res.json({ success: true, data: ads });
     } else {
-         res.render('filtered-ads', { adData: { anuncios: ads } });
+      res.render('filtered-ads', { adData: { anuncios: ads }, req });
     }
   } catch (error) {
     console.error(`Error obteniendo la lista de anuncios: ${error}`);
@@ -105,6 +107,7 @@ exports.registrarAnuncio = async (req, res) => {
     const fileBuffer = fs.readFileSync(tempFilePath);
     fs.writeFileSync(imagePath, fileBuffer);
     fs.unlinkSync(tempFilePath);
+    requester.send({ type: 'createThumbnail', imagePath });
 
     const nuevoAnuncio = new Ad({
       nombre,
@@ -150,8 +153,3 @@ exports.getImage = (req, res) => {
     }
   });
 };
-
-
-
-
-
