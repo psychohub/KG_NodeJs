@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nodepop</title>
+  <title><%= __('nodePopTitle') %></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .anuncio-img {
@@ -50,72 +50,85 @@
   </style>
 </head>
 <body>
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <img src="<%= req.getLocale() === 'en' ? '/images/en.jpg' : '/images/es.jpg' %>" alt="<%= req.getLocale() %>" width="20" height="20">
+    </a>
+    <div class="dropdown-menu" aria-labelledby="languageDropdown">
+      <a class="dropdown-item" href="#" onclick="changeLanguage('en')">
+        <img src="/images/en.jpg" width="20" height="20" alt="en"> <%= __('english') %>
+      </a>
+      <a class="dropdown-item" href="#" onclick="changeLanguage('es')">
+        <img src="/images/es.jpg" width="20" height="20" alt="es"> <%= __('spanish') %>
+      </a>
+    </div>
+  </li>
   <div class="container mt-5">
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active" aria-current="page" href="#anunciosSinFiltro" data-bs-toggle="tab">Anuncios</a>
+        <a class="nav-link active" aria-current="page" href="#anunciosSinFiltro" data-bs-toggle="tab"><%= __('adsWithoutFilter') %></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#anunciosConFiltro" data-bs-toggle="tab">Anuncios Con Filtro</a>
+        <a class="nav-link" href="#anunciosConFiltro" data-bs-toggle="tab"><%= __('adsWithFilter') %></a>
       </li>
     </ul>
     <div class="tab-content">
       <div class="tab-pane active" id="anunciosSinFiltro">
-         <form action="/api/ads/anuncios/registrar" method="post" enctype="multipart/form-data">
-  <div class="container">
-    <div class="row justify-content-center align-items-center">
-      <div class="col-md-6">
-        <h1 class="mb-4">Registrar Anuncio</h1>
-        <div class="mb-3">
-          <label for="nombre" class="form-label">Nombre:</label>
-          <input type="text" class="form-control" id="nombre" name="nombre" required>
-        </div>
-        <div class="mb-3">
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="venta" name="venta">
-            <label class="form-check-label" for="venta">Venta</label>
+        <form action="/api/ads/anuncios/registrar" method="post" enctype="multipart/form-data">
+          <div class="container">
+            <div class="row justify-content-center align-items-center">
+              <div class="col-md-6">
+                <h1 class="mb-4"><%= __('registerAdHeading') %></h1>
+                <div class="mb-3">
+                  <label for="nombre" class="form-label"><%= __('name') %>:</label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="venta" name="venta">
+                    <label class="form-check-label" for="venta"><%= __('sale') %></label>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="precio" class="form-label"><%= __('price') %>:</label>
+                  <input type="number" class="form-control" id="precio" name="precio" required>
+                </div>
+                <div class="mb-3">
+                  <label for="foto" class="form-label"><%= __('photo') %>:</label>
+                  <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
+                </div>
+                <div class="mb-3">
+                  <label for="tags" class="form-label"><%= __('tags') %>:</label>
+                  <select id="tags" class="form-select" name="tags" multiple>
+                    <option value="work">Work</option>
+                    <option value="lifestyle">Lifestyle</option>
+                    <option value="motor">Motor</option>
+                    <option value="mobile">Mobile</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary"><%= __('registerAd') %></button>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="mb-3">
-          <label for="precio" class="form-label">Precio:</label>
-          <input type="number" class="form-control" id="precio" name="precio" required>
-        </div>
-        <div class="mb-3">
-          <label for="foto" class="form-label">Foto:</label>
-          <input type="file" class="form-control" id="foto" name="foto" accept="image/*" required>
-        </div>
-        <div class="mb-3">
-          <label for="tags" class="form-label">Tags:</label>
-          <select id="tags" class="form-select" name="tags" multiple>
-            <option value="work">Work</option>
-            <option value="lifestyle">Lifestyle</option>
-            <option value="motor">Motor</option>
-            <option value="mobile">Mobile</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Registrar Anuncio</button>
-      </div>
-    </div>
-  </div>
-  </form>
-        <h1>Anuncios</h1>
+        </form>
+        <h1><%= __('adsHeading') %></h1>
         <ul id="anuncios-container">
           <% if (adData && adData.anuncios && adData.anuncios.length > 0) { %>
             <% adData.anuncios.forEach(anuncio => { %>
               <li>
                 <h2><%= anuncio.nombre %></h2>
-                <p><%= anuncio.venta ? 'Se vende' : 'Se busca' %></p>
-                <p>Precio: <%= anuncio.precio %></p>
+                <p><%= anuncio.venta ? __('forSale') : __('wanted') %></p>
+                <p><%= __('price') %>: <%= anuncio.precio %></p>
                 <% if (anuncio.foto) { %>
                   <img class="anuncio-img" src="<%= anuncio.foto %>" alt="<%= anuncio.nombre %>">
                 <% } else { %>
                   <img class="anuncio-img" src="/images/<%= anuncio.nombre %>.jpg" alt="<%= anuncio.nombre %>">
                 <% } %>
-                <p>Tags: <%= anuncio.tags.join(', ') %></p>
+                <p><%= __('tags') %>: <%= anuncio.tags.join(', ') %></p>
               </li>
             <% }); %>
           <% } else { %>
-            <li>No se encontraron anuncios</li>
+            <li><%= __('noAdsFound') %></li>
           <% } %>
         </ul>
       </div>
@@ -124,53 +137,53 @@
           <div class="row justify-content-center align-items-center">
             <div class="col-md-6">
               <form action="/anuncios/filtro" method="get" class="mt-5">
-                <h2 class="text-center mb-4">Filtrar Anuncios</h2>
+                <h2 class="text-center mb-4"><%= __('filterAdsHeading') %></h2>
                 <div class="mb-3">
-                  <label for="nombre" class="form-label">Nombre:</label>
-                  <input type="text" id="nombre" name="nombre" class="form-control" <%= typeof nombre !== 'undefined' ? `value="${nombre}"` : '' %> >
+                  <label for="nombre" class="form-label"><%= __('name') %>:</label>
+                  <input type="text" id="nombre" name="nombre" class="form-control" <%= typeof nombre !== 'undefined' ? `value="${nombre}"` : '' %>>
                 </div>
                 <div class="mb-3">
-                  <label for="venta" class="form-label">Tipo:</label>
+                  <label for="venta" class="form-label"><%= __('type') %>:</label>
                   <select id="venta" name="venta" class="form-select">
-                    <option value="true" <%= typeof venta !== 'undefined' && venta === 'true' ? 'selected' : '' %>>Venta</option>
-                    <option value="false" <%= typeof venta !== 'undefined' && venta === 'false' ? 'selected' : '' %>>Búsqueda</option>
+                    <option value="true" <%= typeof venta !== 'undefined' && venta === 'true' ? 'selected' : '' %>><%= __('forSale') %></option>
+                    <option value="false" <%= typeof venta !== 'undefined' && venta === 'false' ? 'selected' : '' %>><%= __('wanted') %></option>
                   </select>
                 </div>
-                <label for="tag" class="form-label">Tag:</label>
-                <input type="text" id="tag" name="tag" class="form-control" <%= typeof tag !== 'undefined' ? `value="${tag}"` : '' %> >
+                <label for="tag" class="form-label"><%= __('tag') %>:</label>
+                <input type="text" id="tag" name="tag" class="form-control" <%= typeof tag !== 'undefined' ? `value="${tag}"` : '' %>>
                 <div class="row">
                   <div class="col-md-6 mb-3">
-                    <label for="precioMin" class="form-label">Precio Mínimo:</label>
-                    <input type="number" id="precioMin" name="precioMin" class="form-control" <%= typeof precioMin !== 'undefined' ? `value="${precioMin}"` : '' %> >
+                    <label for="precioMin" class="form-label"><%= __('minPrice') %>:</label>
+                    <input type="number" id="precioMin" name="precioMin" class="form-control" <%= typeof precioMin !== 'undefined' ? `value="${precioMin}"` : '' %>>
                   </div>
                   <div class="col-md-6 mb-3">
-                    <label for="precioMax" class="form-label">Precio Máximo:</label>
-                    <input type="number" id="precioMax" name="precioMax" class="form-control" <%= typeof precioMax !== 'undefined' ? `value="${precioMax}"` : '' %> >
+                    <label for="precioMax" class="form-label"><%= __('maxPrice') %>:</label>
+                    <input type="number" id="precioMax" name="precioMax" class="form-control" <%= typeof precioMax !== 'undefined' ? `value="${precioMax}"` : '' %>>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Buscar</button>
+                <button type="submit" class="btn btn-primary"><%= __('search') %></button>
               </form>
             </div>
           </div>
         </div>
-        <h1>Anuncios</h1>
+        <h1><%= __('adsHeading') %></h1>
         <ul>
           <% if (adData && adData.anuncios && adData.anuncios.length > 0) { %>
             <% adData.anuncios.forEach(anuncio => { %>
               <li>
                 <h2><%= anuncio.nombre %></h2>
-                <p><%= anuncio.venta ? 'Se vende' : 'Se busca' %></p>
-                <p>Precio: <%= anuncio.precio %></p>
+                <p><%= anuncio.venta ? __('forSale') : __('wanted') %></p>
+                <p><%= __('price') %>: <%= anuncio.precio %></p>
                 <% if (anuncio.foto) { %>
                   <img class="anuncio-img" src="<%= anuncio.foto %>" alt="<%= anuncio.nombre %>">
                 <% } else { %>
                   <img class="anuncio-img" src="/images/<%= anuncio.nombre %>.jpg" alt="<%= anuncio.nombre %>">
                 <% } %>
-                <p>Tags: <%= anuncio.tags.join(', ') %></p>
+                <p><%= __('tags') %>: <%= anuncio.tags.join(', ') %></p>
               </li>
             <% }); %>
           <% } else { %>
-            <li>No se encontraron anuncios</li>
+            <li><%= __('noAdsFound') %></li>
           <% } %>
         </ul>
       </div>
@@ -178,6 +191,12 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+ // Función para manejar Internacionalización
+    function changeLanguage(language) {
+      document.cookie = `language=${language}; path=/`;
+      location.reload();
+    }
+
     // Función para manejar la autenticación y almacenar el token
  async function authenticate(email, password) {
   try {

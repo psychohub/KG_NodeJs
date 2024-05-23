@@ -16,5 +16,13 @@
 	"search": "Search",
 	"language": "language",
 	"english": "english",
-	"spanish": "spanish"
-}
+	"spanish": "spanish",
+	"adsWithoutFilter": "adsWithoutFilter",
+	"adsWithFilter": "adsWithFilter",
+	"sale": "sale",
+	"photo": "photo",
+	"type": "type",
+	"tag": "tag",
+	"minPrice": "minPrice",
+	"maxPrice": "maxPrice"
+  }

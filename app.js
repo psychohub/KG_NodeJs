@@ -51,7 +51,15 @@ const storage = multer.diskStorage({
   },
 });
 
+
+
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  const language = req.cookies.language || 'en';
+  req.setLocale(language);
+  next();
+});
 
 function verifyToken(req, res, next) {
   const token = req.cookies.token;
