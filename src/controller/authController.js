@@ -1,6 +1,37 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
+/**
+ * @swagger
+ * /api/auth/authenticate:
+ *   post:
+ *     summary: Autenticar usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Autenticación exitosa
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Credenciales incorrectas
+ *       500:
+ *         description: Error interno del servidor
+ */
 exports.authenticate = async (req, res) => {
   const { email, password } = req.body;
 

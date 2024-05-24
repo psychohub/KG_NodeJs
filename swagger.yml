@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: PsychoHub API
+  version: "1.0.0"
+  description: Documentación de la API de PsychoHub
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desarrollo
+paths:
+  /api/ads/anuncios:
+    get:
+      summary: Obtiene una lista de anuncios
+      responses:
+        '200':
+          description: Una lista de anuncios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ad'
+components:
+  schemas:
+    Ad:
+      type: object
+      properties:
+        nombre:
+          type: string
+        venta:
+          type: boolean
+        precio:
+          type: number
+        foto:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string

@@ -8,6 +8,28 @@ const upload = multer({ dest: 'uploads/' });
 const cote = require('cote');
 const requester = new cote.Requester({ name: 'thumbnail requester' });
 
+/**
+ * @swagger
+ * /api/ads/anuncios:
+ *   get:
+ *     summary: Obtener lista de anuncios sin filtros
+ *     responses:
+ *       200:
+ *         description: Lista de anuncios obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Ad'
+ *       500:
+ *         description: Error interno del servidor
+ */
 // Obtener lista de anuncios sin filtros
 exports.getAds = async (req, res) => {
   try {
@@ -37,6 +59,54 @@ exports.getAds = async (req, res) => {
 };
 
 
+/**
+ * @swagger
+ * /api/ads/anuncios/filtro:
+ *   get:
+ *     summary: Obtener lista de anuncios con filtros
+ *     parameters:
+ *       - in: query
+ *         name: tag
+ *         schema:
+ *           type: string
+ *         description: Filtrar por tag
+ *       - in: query
+ *         name: venta
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar por tipo de anuncio (venta o búsqueda)
+ *       - in: query
+ *         name: nombre
+ *         schema:
+ *           type: string
+ *         description: Filtrar por nombre de artículo
+ *       - in: query
+ *         name: precioMin
+ *         schema:
+ *           type: number
+ *         description: Precio mínimo
+ *       - in: query
+ *         name: precioMax
+ *         schema:
+ *           type: number
+ *         description: Precio máximo
+ *     responses:
+ *       200:
+ *         description: Lista de anuncios filtrada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Ad'
+ *       500:
+ *         description: Error interno del servidor
+ */
 // Obtener lista de anuncios con filtros
 exports.getFilteredAds = async (req, res) => {
   try {
@@ -81,6 +151,49 @@ exports.getFilteredAds = async (req, res) => {
   }
 };
 
+/**
+ * @swagger
+ * /api/ads/anuncios/registrar:
+ *   post:
+ *     summary: Registrar un nuevo anuncio
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               venta:
+ *                 type: boolean
+ *               precio:
+ *                 type: number
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *               tags:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Anuncio registrado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Ad'
+ *       400:
+ *         description: Error en los datos de entrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 // Registrar un nuevo anuncio
 const { body, validationResult } = require('express-validator');
 

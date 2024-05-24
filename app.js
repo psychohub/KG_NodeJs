@@ -19,6 +19,7 @@ const errorHandler = require('./errorHandler');
 const Ad = require('./src/models/adModel');
 const { connection } = require('./connectMongoose');
 const { uploadDir } = require(path.join(__dirname, 'config'));
+const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
 
 // Configuración de Express
 app.use(cors()); 
@@ -76,7 +77,8 @@ function verifyToken(req, res, next) {
   }
 }
 
-
+// Documentación Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rutas
 app.get('/api/login', (req, res) => {
