@@ -41,6 +41,16 @@ npm test
 
 Las pruebas se ejecutarán utilizando Jest y se mostrará el resultado en la consola.
 
+Documentación de la API con Swagger
+----------------------------
+
+La documentación de la API se genera automáticamente utilizando Swagger. Puedes revisar la documentación completa de la API accediendo a la siguiente URL después de iniciar el servidor:
+
+http://localhost:3000/api-docs
+    
+Esta documentación proporciona detalles sobre todos los endpoints disponibles, incluyendo los parámetros de entrada, las respuestas esperadas y ejemplos de uso
+    
+
 Operaciones Disponibles
 -----------------------
 
@@ -111,3 +121,26 @@ Aspectos Técnicos
 *   Se incluye un middleware para el manejo de errores que devuelve respuestas JSON con los errores detectados.
     
 *   El proyecto se ejecuta con el comando npm run start.
+
+Comandos
+-----------------
+
+*  Iniciar el servidor
+
+npm run start
+
+*  Inicializar la base de datos
+
+node initDB.js
+
+*  Iniciar el servicio de thumbnails
+
+node thumbnailService.js
+
+*  Ejecutar pruebas
+
+npm test
+
+*  Ver la documentación de la API
+
+http://localhost:3000/api-docs
