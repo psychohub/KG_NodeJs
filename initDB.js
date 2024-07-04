@@ -21,7 +21,7 @@ rl.question('¿Estás seguro de que deseas reiniciar la base de datos? Esta acci
 
 const initDB = async () => {
   try {
-    await connectMongoose.mongoose.connection;
+    await connectMongoose.connection;
 
     // Borrar todas las entradas existentes
     const deleteResult = await Ad.deleteMany({});
