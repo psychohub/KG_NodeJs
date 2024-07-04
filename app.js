@@ -47,11 +47,12 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`);
+    cb(null, ${Date.now()}_${file.originalname});
   },
 });
 
 const upload = multer({ storage: storage });
+
 
 app.use(cookieParser());
 
@@ -105,9 +106,9 @@ app.get('/images/:imageName', adController.getImage);
 // Filtrado de anuncios (protegido)
 app.get('/anuncios/filtro', requireAuth, adController.getFilteredAds);
 
-// Ruta principal redirigiendo a la página de login
+// Ruta principal redirigiendo a anuncios
 app.get('/', (req, res) => {
-  res.redirect('/api/login');
+  res.redirect('/api/ads/anuncios');
 });
 
 // Ruta de confirmación
@@ -129,3 +130,4 @@ app.use(errorHandler);
 app.use('/api/ads', verifyToken);
 
 module.exports = app;
+
