@@ -53,7 +53,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-
 app.use(cookieParser());
 
 app.use((req, res, next) => {
@@ -106,9 +105,9 @@ app.get('/images/:imageName', adController.getImage);
 // Filtrado de anuncios (protegido)
 app.get('/anuncios/filtro', requireAuth, adController.getFilteredAds);
 
-// Ruta principal redirigiendo a anuncios
+// Ruta principal redirigiendo a la página de login
 app.get('/', (req, res) => {
-  res.redirect('/api/ads/anuncios');
+  res.redirect('/api/login');
 });
 
 // Ruta de confirmación
