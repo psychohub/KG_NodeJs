@@ -1,5 +1,4 @@
-require('dotenv').config(); 
-
+require('dotenv').config();
 // Importar rutas y controladores
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
@@ -7,7 +6,7 @@ const express = require('express');
 const i18n = require('i18n');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path'); 
+const path = require('path');
 const multer = require('multer');
 const { body } = require('express-validator');
 const app = express();
@@ -22,7 +21,7 @@ const { uploadDir } = require(path.join(__dirname, 'config'));
 const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
 
 // Configuración de Express
-app.use(cors()); 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -38,7 +37,6 @@ i18n.configure({
   defaultLocale: 'en',
   cookie: 'language',
 });
-
 app.use(i18n.init);
 
 // Configuración de multer para subir archivos
@@ -47,12 +45,10 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, ${Date.now()}_${file.originalname});
+    cb(null, `${Date.now()}_${file.originalname}`); // Corrección: se agregaron las comillas invertidas (`)
   },
 });
-
 const upload = multer({ storage: storage });
-
 
 app.use(cookieParser());
 
@@ -67,7 +63,6 @@ function verifyToken(req, res, next) {
   if (!token) {
     return res.status(401).send('Acceso denegado');
   }
-
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     req.user = verified;
@@ -85,14 +80,15 @@ app.get('/api/login', (req, res) => {
   res.render('login');
 });
 
-app.use('/api/auth', authRoutes); 
+app.use('/api/auth', authRoutes);
 
 // Rutas de anuncios protegidas por autenticación
 app.use('/api/ads', requireAuth, adRoutes);
 
 // Ruta para registrar un nuevo anuncio con validaciones
-app.post('/api/ads/anuncios/registrar',
-  upload.single('foto'), 
+app.post(
+  '/api/ads/anuncios/registrar',
+  upload.single('foto'),
   [
     body('nombre').notEmpty().withMessage('El nombre es requerido'),
     body('precio').isNumeric().withMessage('El precio debe ser un número válido'),
@@ -112,7 +108,7 @@ app.get('/', (req, res) => {
 });
 
 // Ruta de confirmación
-app.get('/confirmacion', async function(req, res) {
+app.get('/confirmacion', async function (req, res) {
   const ads = await Ad.find();
   const successMessage = 'Anuncio registrado correctamente';
   res.render('index', { adData: { anuncios: ads }, success: successMessage, req });
@@ -127,7 +123,7 @@ connection.once('open', () => {
 
 // Middleware de manejo de errores
 app.use(errorHandler);
+
 app.use('/api/ads', verifyToken);
 
 module.exports = app;
-
