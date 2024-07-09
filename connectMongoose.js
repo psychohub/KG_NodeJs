@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 // Configuración de mongoose y conexión a la base de datos
 mongoose.connect('mongodb://admin:password123@localhost:27017/parsedb?authSource=admin', {
-  
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 });
 
 // Conexión exitosa
