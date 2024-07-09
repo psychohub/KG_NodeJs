@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://admin:password123@localhost:27017/parsedb', {
+mongoose.connect('mongodb://admin:password123@127.0.0.1:27017/parsedb', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
