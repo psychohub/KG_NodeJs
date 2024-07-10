@@ -46,7 +46,7 @@ Documentación de la API con Swagger
 
 La documentación de la API se genera automáticamente utilizando Swagger. Puedes revisar la documentación completa de la API accediendo a la siguiente URL después de iniciar el servidor:
 
-http://localhost:3000/api-docs
+http://localhost:3001/api-docs
     
 Esta documentación proporciona detalles sobre todos los endpoints disponibles, incluyendo los parámetros de entrada, las respuestas esperadas y ejemplos de uso
     
@@ -116,7 +116,7 @@ Aspectos Técnicos
     
 *   Se utiliza el patrón de diseño MVC (Modelo-Vista-Controlador) para organizar el código.
     
-*   El API se ejecuta en el puerto 3000 por defecto, pero se puede cambiar en el archivo de configuración.
+*   El API se ejecuta en el puerto 3001 por defecto, pero se puede cambiar en el archivo de configuración.
     
 *   Se incluye un middleware para el manejo de errores que devuelve respuestas JSON con los errores detectados.
     
@@ -143,4 +143,4 @@ npm test
 
 *  Ver la documentación de la API
 
-http://localhost:3000/api-docs
+http://localhost:3001/api-docs
