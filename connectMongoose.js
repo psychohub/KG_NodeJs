@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Configuración de mongoose y conexión a la base de datos
-mongoose.connect('mongodb://admin:password123@localhost:27017/parsedb?authSource=admin', {
+mongoose.connect('mongodb://psychohub:Abc123456@3.12.197.189:27017/nodepop', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
