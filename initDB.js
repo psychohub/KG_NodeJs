@@ -34,7 +34,8 @@ const initDB = async () => {
     await User.deleteMany({ email: 'user@example.com' });
 
     // Usuario inicial
-    const user = new User({ email: 'user@example.com', password: '1234' });
+    const hashedPassword = '$2b$10$/qZ5iCHnQ5c/iG2SdrKKaOPgXV7bq2aEKazz4jXiH98bXr/4/6QYW';
+    const user = new User({ email: 'user@example.com', password: hashedPassword });
     await user.save();
 
     console.log('Usuario inicial creado con éxito');
