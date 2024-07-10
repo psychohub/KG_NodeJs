@@ -116,8 +116,8 @@ app.get('/confirmacion', async function (req, res) {
 
 // Conexión a la base de datos y levantamiento del servidor
 connection.once('open', () => {
-  app.listen(3000, () => {
-    console.log('Servidor iniciado en el puerto 3000');
+  app.listen(3001, () => {
+    console.log('Servidor iniciado en el puerto 3001');
   });
 });
 
