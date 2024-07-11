@@ -7,197 +7,12 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const cote = require('cote');
 const requester = new cote.Requester({ name: 'thumbnail requester' });
-
-/**
- * @swagger
- * /api/ads/anuncios:
- *   get:
- *     summary: Obtener lista de anuncios sin filtros
- *     responses:
- *       200:
- *         description: Lista de anuncios obtenida correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Ad'
- *       500:
- *         description: Error interno del servidor
- */
-// Obtener lista de anuncios sin filtros
-exports.getAds = async (req, res) => {
-  try {
-    const ads = await Ad.find();
-
-    const data = {
-      adData: { anuncios: ads },
-      tag: '', 
-      nombre: '',
-      venta: '',
-      precioMin: '',
-      precioMax: '',
-    };
-
-    // Verificar si es una solicitud de API o no
-    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
-
-    if (isApiRequest) {
-      res.json({ success: true, data: ads });
-    } else {
-      res.render('index', { ...data, req });
-    }
-  } catch (error) {
-    console.error(`Error obteniendo la lista de anuncios: ${error}`);
-    res.status(500).json({ success: false, error: 'Error interno del servidor' });
-  }
-};
-
-
-/**
- * @swagger
- * /api/ads/anuncios/filtro:
- *   get:
- *     summary: Obtener lista de anuncios con filtros
- *     parameters:
- *       - in: query
- *         name: tag
- *         schema:
- *           type: string
- *         description: Filtrar por tag
- *       - in: query
- *         name: venta
- *         schema:
- *           type: boolean
- *         description: Filtrar por tipo de anuncio (venta o búsqueda)
- *       - in: query
- *         name: nombre
- *         schema:
- *           type: string
- *         description: Filtrar por nombre de artículo
- *       - in: query
- *         name: precioMin
- *         schema:
- *           type: number
- *         description: Precio mínimo
- *       - in: query
- *         name: precioMax
- *         schema:
- *           type: number
- *         description: Precio máximo
- *     responses:
- *       200:
- *         description: Lista de anuncios filtrada correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Ad'
- *       500:
- *         description: Error interno del servidor
- */
-// Obtener lista de anuncios con filtros
-exports.getFilteredAds = async (req, res) => {
-  try {
-    const { tag, venta, nombre, precioMin, precioMax } = req.query;
-
-    const filters = {};
-
-    // Filtro por tag, venta, nombre
-    if (tag) filters.tags = tag;
-    if (venta !== undefined) filters.venta = venta === 'true';
-    if (nombre) filters.nombre = new RegExp(nombre, 'i');
-
-    // Filtro por rango de precio
-    if (precioMin || precioMax) {
-      const precioFilter = {};
-      if (precioMin) precioFilter.$gte = parseFloat(precioMin);
-      if (precioMax) precioFilter.$lte = parseFloat(precioMax);
-      filters.precio = precioFilter;
-    }
-
-    // Filtro por nombre
-    if (nombre) {
-      filters.nombre = new RegExp(nombre, 'i');
-    }
-
-    // Elimina propiedades con valores falsy (undefined, null, "")
-    Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
-
-    // lógica para aplicar los filtros a la consulta
-    const ads = await Ad.find(filters);
-
-    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
-
-    if (isApiRequest) {
-      res.json({ success: true, data: ads });
-    } else {
-      res.render('filtered-ads', { adData: { anuncios: ads }, req });
-    }
-  } catch (error) {
-    console.error(`Error obteniendo la lista de anuncios: ${error}`);
-    res.status(500).json({ success: false, error: 'Error interno del servidor' });
-  }
-};
-
-/**
- * @swagger
- * /api/ads/anuncios/registrar:
- *   post:
- *     summary: Registrar un nuevo anuncio
- *     requestBody:
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               nombre:
- *                 type: string
- *               venta:
- *                 type: boolean
- *               precio:
- *                 type: number
- *               foto:
- *                 type: string
- *                 format: binary
- *               tags:
- *                 type: array
- *                 items:
- *                   type: string
- *     responses:
- *       200:
- *         description: Anuncio registrado correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                   type: string
- *                 data:
- *                   $ref: '#/components/schemas/Ad'
- *       400:
- *         description: Error en los datos de entrada
- *       500:
- *         description: Error interno del servidor
- */
-// Registrar un nuevo anuncio
 const { body, validationResult } = require('express-validator');
 
+// Registrar un nuevo anuncio
 exports.registrarAnuncio = async (req, res) => {
+  const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -205,7 +20,7 @@ exports.registrarAnuncio = async (req, res) => {
     }
 
     if (!req.file) {
-      if (req.headers.accept && req.headers.accept.includes('json')) {
+      if (isApiRequest) {
         return res.status(400).json({ error: 'No se ha enviado ningún archivo' });
       } else {
         return res.redirect(`/?error=${encodeURIComponent('No se ha enviado ningún archivo')}`);
@@ -232,20 +47,19 @@ exports.registrarAnuncio = async (req, res) => {
 
     await nuevoAnuncio.save();
 
-   const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
-   if (isApiRequest) {
-     return res.json({ success: true, message: 'Anuncio registrado correctamente', data: nuevoAnuncio });
-   } else {
-     return res.redirect('/confirmacion'); 
-   }
- } catch (error) {
-   console.error(`Error al registrar el anuncio: ${error}`);
-   if (isApiRequest) {
-     return res.status(500).json({ error: 'Error interno del servidor' });
-   } else {
-     return res.redirect(`/?error=${encodeURIComponent(error.message)}`);
-   }
- }
+    if (isApiRequest) {
+      return res.status(201).json({ success: true, message: 'Anuncio registrado correctamente', data: nuevoAnuncio });
+    } else {
+      return res.redirect('/confirmacion');
+    }
+  } catch (error) {
+    console.error(`Error al registrar el anuncio: ${error}`);
+    if (isApiRequest) {
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    } else {
+      return res.redirect(`/?error=${encodeURIComponent(error.message)}`);
+    }
+  }
 };
 
 // Reglas de validación para el registro de anuncios
@@ -254,6 +68,73 @@ exports.validateRegistroAnuncio = [
   body('precio').isNumeric().withMessage('El precio debe ser un número válido'),
 ];
 
+// Obtener lista de anuncios sin filtros
+exports.getAds = async (req, res) => {
+  try {
+    const ads = await Ad.find();
+    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+
+    if (isApiRequest) {
+      return res.json({ success: true, data: ads });
+    } else {
+      const data = {
+        adData: { anuncios: ads },
+        tag: '',
+        nombre: '',
+        venta: '',
+        precioMin: '',
+        precioMax: '',
+      };
+      return res.render('index', { ...data, req });
+    }
+  } catch (error) {
+    console.error(`Error obteniendo la lista de anuncios: ${error}`);
+    if (req.headers.accept && req.headers.accept.includes('json')) {
+      return res.status(500).json({ success: false, error: 'Error interno del servidor' });
+    } else {
+      return res.status(500).render('error', { error: 'Error interno del servidor' });
+    }
+  }
+};
+
+// Obtener lista de anuncios con filtros
+exports.getFilteredAds = async (req, res) => {
+  try {
+    const { tag, venta, nombre, precioMin, precioMax } = req.query;
+
+    const filters = {};
+
+    if (tag) filters.tags = tag;
+    if (venta !== undefined) filters.venta = venta === 'true';
+    if (nombre) filters.nombre = new RegExp(nombre, 'i');
+
+    if (precioMin || precioMax) {
+      const precioFilter = {};
+      if (precioMin) precioFilter.$gte = parseFloat(precioMin);
+      if (precioMax) precioFilter.$lte = parseFloat(precioMax);
+      filters.precio = precioFilter;
+    }
+
+    if (nombre) {
+      filters.nombre = new RegExp(nombre, 'i');
+    }
+
+    Object.keys(filters).forEach((key) => filters[key] === undefined && delete filters[key]);
+
+    const ads = await Ad.find(filters);
+
+    const isApiRequest = req.headers.accept && req.headers.accept.includes('json');
+
+    if (isApiRequest) {
+      res.json({ success: true, data: ads });
+    } else {
+      res.render('filtered-ads', { adData: { anuncios: ads }, req });
+    }
+  } catch (error) {
+    console.error(`Error obteniendo la lista de anuncios: ${error}`);
+    res.status(500).json({ success: false, error: 'Error interno del servidor' });
+  }
+};
 
 // Función para manejar las solicitudes de imágenes
 exports.getImage = (req, res) => {

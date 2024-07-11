@@ -1,6 +1,6 @@
 const request = require('supertest');
 const app = require('../app'); 
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 const User = require('../src/models/userModel');
 const path = require('path');
 const fs = require('fs');
@@ -12,19 +12,13 @@ describe('API de Anuncios', () => {
   let token;
 
   beforeAll(async () => {
-    // Elimina el usuario de prueba existente, si existe
     await User.deleteOne({ email: 'user@test.com' });
-
-    // Crea un nuevo usuario de prueba en la base de datos
     const user = new User({ email: 'user@test.com', password: '1234' });
     await user.save();
-
-    // Genera un token válido utilizando el ID del usuario de prueba
     token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   });
 
   afterAll(async () => {
-    // Elimina el usuario de prueba de la base de datos
     await User.deleteOne({ email: 'user@test.com' });
   });
 
@@ -51,11 +45,9 @@ describe('API de Anuncios', () => {
       precio: 100,
       tags: ['work', 'lifestyle']
     };
-
     const imagePath = path.join(__dirname, 'fixtures', 'test.jpg');
-
     if (!fs.existsSync(imagePath)) {
-      fs.writeFileSync(imagePath, ''); 
+      fs.writeFileSync(imagePath, 'test'); 
     }
 
     request(app)
@@ -65,10 +57,10 @@ describe('API de Anuncios', () => {
       .field('nombre', newAd.nombre)
       .field('venta', newAd.venta)
       .field('precio', newAd.precio)
-      .field('tags', newAd.tags)
+      .field('tags', newAd.tags.join(','))
       .attach('foto', imagePath)
       .expect('Content-Type', /json/)
-      .expect(200)
+      .expect(201)
       .end((err, res) => {
         if (err) return done(err);
         expect(res.body.success).toBe(true);

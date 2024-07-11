@@ -1,15 +1,15 @@
 require('dotenv').config();
-// Importar rutas y controladores
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
-const express = require('express');
 const i18n = require('i18n');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const path = require('path');
 const multer = require('multer');
 const { body } = require('express-validator');
 const app = express();
+
 const adController = require('./src/controller/adController');
 const adRoutes = require('./src/routes/adRoutes');
 const authRoutes = require('./src/routes/authRoutes');
@@ -17,7 +17,7 @@ const { requireAuth } = require('./src/middleware/authMiddleware');
 const errorHandler = require('./errorHandler');
 const Ad = require('./src/models/adModel');
 const { connection } = require('./connectMongoose');
-const { uploadDir } = require(path.join(__dirname, 'config'));
+const { uploadDir } = require('./config');
 const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
 
 // Configuración de Express
@@ -25,10 +25,22 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Configuración de cabeceras para permitir JSON
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json');
+  next();
+});
+
+// Rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/ads', requireAuth, adRoutes);
+
+// Servir archivos estáticos desde la carpeta public
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Configuración de ejs para vistas
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'src/views'));
-app.use('/images', express.static(path.join(__dirname, 'src/images')));
+app.set('views', path.join(__dirname, 'src', 'views'));
 
 // Configuración de i18n para el backend
 i18n.configure({
@@ -45,7 +57,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, `${Date.now()}_${file.originalname}`); // Corrección: se agregaron las comillas invertidas (`)
+    cb(null, `${Date.now()}_${file.originalname}`);
   },
 });
 const upload = multer({ storage: storage });
@@ -110,7 +122,7 @@ app.get('/', (req, res) => {
 // Ruta de confirmación
 app.get('/confirmacion', async function (req, res) {
   const ads = await Ad.find();
-  const successMessage = 'Anuncio registrado correctamente';
+  const successMessage = req.__('Anuncio registrado correctamente');
   res.render('index', { adData: { anuncios: ads }, success: successMessage, req });
 });
 
