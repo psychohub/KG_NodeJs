@@ -15,7 +15,6 @@ const adRoutes = require('./src/routes/adRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const { requireAuth } = require('./src/middleware/authMiddleware');
 const errorHandler = require('./errorHandler');
-const Ad = require('./src/models/adModel');
 const { connection } = require('./connectMongoose');
 const { uploadDir } = require('./config');
 const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
@@ -24,23 +23,14 @@ const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Configuración de cabeceras para permitir JSON
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  next();
-});
-
-// Rutas
-app.use('/api/auth', authRoutes);
-app.use('/api/ads', requireAuth, adRoutes);
-
-// Servir archivos estáticos desde la carpeta public
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cookieParser());
 
 // Configuración de ejs para vistas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src', 'views'));
+
+// Configuración de archivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configuración de i18n para el backend
 i18n.configure({
@@ -61,8 +51,6 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage: storage });
-
-app.use(cookieParser());
 
 app.use((req, res, next) => {
   const language = req.cookies.language || 'en';
@@ -135,7 +123,5 @@ connection.once('open', () => {
 
 // Middleware de manejo de errores
 app.use(errorHandler);
-
-app.use('/api/ads', verifyToken);
 
 module.exports = app;
