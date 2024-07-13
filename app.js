@@ -19,8 +19,13 @@ const { connection } = require('./connectMongoose');
 const { uploadDir } = require('./config');
 const { swaggerUi, swaggerSpec } = require('./lib/swaggerMiddleware');
 
-// Configuración de Express
-app.use(cors());
+// Configuración de CORS
+app.use(cors({
+  origin: 'http://3.12.197.189', // Permite solicitudes solo desde tu dominio de React
+  credentials: true // Permite enviar cookies en solicitudes de origen cruzado
+}));
+
+// Resto de configuraciones de Express
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
