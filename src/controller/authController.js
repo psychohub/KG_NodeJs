@@ -56,9 +56,10 @@ exports.authenticate = async (req, res) => {
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     console.log(`Token generado: ${token}`);
-    res.json({ token });
+    res.json({ accessToken: token });
   } catch (error) {
     console.error(`Error interno del servidor: ${error}`);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
