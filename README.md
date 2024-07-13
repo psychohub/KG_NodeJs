@@ -1,3 +1,34 @@
+## Despliegue en AWS
+
+El proyecto ha sido desplegado en Amazon Web Services (AWS) utilizando una instancia EC2. Se han configurado dos aplicaciones:
+
+1. **Aplicación Node.js (Backend)**
+   - URL: [http://psychohubweb16.duckdns.org/](http://psychohubweb16.duckdns.org/)
+   - Esta aplicación sirve la API REST y maneja la lógica del backend.
+
+2. **Aplicación React (Frontend)**
+   - URL: [http://3.12.197.189/](http://3.12.197.189/)
+   - Esta es la interfaz de usuario construida con React.
+
+### Configuración del Servidor
+
+- Se utiliza PM2 como gestor de procesos para mantener la aplicación Node.js en ejecución continuamente.
+- Nginx está configurado como proxy inverso para manejar las peticiones HTTP y redirigirlas a la aplicación Node.js correspondiente.
+
+### Servicio de Archivos Estáticos
+
+Los archivos estáticos son servidos directamente por Nginx para mejorar el rendimiento. Como ejemplo, se puede acceder a una imagen estática en la siguiente URL:
+
+[http://3.12.197.189/public/images/Bicicleta.jpg](http://3.12.197.189/public/images/Bicicleta.jpg)
+
+Esta imagen se sirve con una cabecera HTTP personalizada `X-Owner` cuyo valor es "psychohub", que corresponde al nombre de usuario de GitHub del desarrollador.
+
+### Acceso por IP vs Nombre de Dominio
+
+- Al acceder mediante la dirección IP del servidor ([http://3.12.197.189/](http://3.12.197.189/)), se carga la aplicación React (frontend).
+- Al acceder mediante el nombre de dominio ([http://psychohubweb16.duckdns.org/](http://psychohubweb16.duckdns.org/)), se accede a la API de Node.js (backend).
+
+
 Instalación
 -----------
 
